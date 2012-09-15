@@ -275,6 +275,8 @@ namespace Client
         private Panel InfoBar;
         CRMmanager.FRM_MAIN crm_main;
 
+        
+
         public Client_Form()
         {
             try
@@ -2914,6 +2916,20 @@ namespace Client
                         else
                         {
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName, true);
+                        }
+
+                        string sampleExcelFile = "고객정보대장-샘플.xlsx";
+                        FileInfo tempExcel = new FileInfo(Application.StartupPath + "\\" + sampleExcelFile);
+
+                        FileInfo tempExcelfileinfo = new FileInfo("C:\\MiniCTI\\sample\\" + sampleExcelFile);
+                        if (!tempExcelfileinfo.Exists)
+                        {
+                            logWrite("고객정보대장-샘플 파일 없음");
+                            FileInfo file_copied = tempExcel.CopyTo(tempExcelfileinfo.FullName);
+                        }
+                        else
+                        {
+                            FileInfo file_copied = tempExcel.CopyTo(tempExcelfileinfo.FullName, true);
                         }
 
                         myname = tempMsg[1];//서버측에서 전달된 이름 저장
@@ -9454,6 +9470,12 @@ namespace Client
                 if (!logDir.Exists)
                 {
                     logDir.Create();
+                }
+
+                DirectoryInfo sampleDir = new DirectoryInfo(di.FullName + "\\sample");
+                if (!sampleDir.Exists)
+                {
+                    sampleDir.Create();
                 }
 
                 DirectoryInfo configDir = new DirectoryInfo(di.FullName + "\\config");

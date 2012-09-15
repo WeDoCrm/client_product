@@ -45,7 +45,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -90,7 +89,7 @@
   <ItemGroup>
     <Reference Include="CRMmanager, Version=2.1.1.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\테스트파일\CRMmanager.dll</HintPath>
+      <HintPath>..\CRM_Product\CRMmanager\CRMmanager\bin\Release\CRMmanager.dll</HintPath>
     </Reference>
     <Reference Include="Elegant.Ui.Common, Version=4.2.0.0, Culture=neutral, PublicKeyToken=3a2b400713aae6e0, processorArchitecture=MSIL" />
     <Reference Include="Elegant.Ui.Common.Theme.Office2010Blue, Version=4.2.0.0, Culture=neutral, PublicKeyToken=3a2b400713aae6e0, processorArchitecture=MSIL">
@@ -112,13 +111,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files\FOSS Software Inc\Elegant Ribbon\Bin\Themes\Elegant.Ui.Ribbon.Theme.Office2010Blue.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.4.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
-    <Reference Include="Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" />
+    <Reference Include="office, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\테스트파일\20110902\Release\office.dll</HintPath>
+    </Reference>
     <Reference Include="SkinSoft.AquaSkin, Version=1.1.0.0, Culture=neutral, PublicKeyToken=24427c624576b01d" />
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
@@ -126,7 +126,6 @@
     <Reference Include="System.Drawing">
       <Name>System.Drawing</Name>
     </Reference>
-    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>
@@ -137,6 +136,7 @@
   <ItemGroup>
     <Content Include="App.ico" />
     <Content Include="ClientCfg.xml" />
+    <Content Include="lib\MySql.Data.dll" />
     <Content Include="MiniCTI_config.xml" />
     <Content Include="MsgCfg.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -525,6 +525,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="고객정보대장-샘플.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -544,9 +545,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="lib\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
