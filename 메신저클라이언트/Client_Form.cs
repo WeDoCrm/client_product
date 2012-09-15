@@ -15,18 +15,35 @@ using System.Runtime.InteropServices;
 using CRMmanager;
 using Microsoft.Win32;
 
+
 namespace Client
 {
-    /// <summary>
-    /// Form1에 대한 요약 설명입니다.
-    /// </summary>
+	/// <summary>
+	/// Form1에 대한 요약 설명입니다.
+	/// </summary>
     public class Client_Form : System.Windows.Forms.Form
     {
-
+       
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")]
         public static extern Int32 GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        //초기 설정 관련 demo vs. product
+        private bool IsProductMode = false;
+        private string AppName = "";
+        private string AppConfigName = "";
+        private string AppRegName = "";
+        private string AppConfigFullPath = "";
+        private string XmlConfigFullPath = "";
+        private string XmlConfigOrgFullPath = "";
+
+        private string UpdateSourceFullPath = "";
+        private string UpdateTargetFullPath = "";
+        private string UpdateSourceDir = "";
+        private string UpdateTargetDir = "";
+        private string UpdateShortDir = "";
+        private string MsgrTitle = "";
 
         private string[] news = new string[10];
         private DirectoryInfo di = new DirectoryInfo(@"C:\MiniCTI");
@@ -64,12 +81,13 @@ namespace Client
         private bool isNoticeListAll = false;
         private bool noActive = false;
         private bool nopop = false;
+        private bool nopop_outbound = false; //발신시 팝업중지
         private bool isHide = false;
         private bool firstCall = false;
         public XmlDocument xmldoc = new XmlDocument();
         private Point mousePoint = Point.Empty;
         private Color labelColor;
-
+        
         private IPAddress local = null;
         private static PopForm popform = null;
         private MissedCallForm missedcallform = null;
@@ -275,7 +293,7 @@ namespace Client
         private Panel InfoBar;
         CRMmanager.FRM_MAIN crm_main;
 
-        
+        const string MEMO_HEADER = "m|";
 
         public Client_Form()
         {
@@ -318,6 +336,10 @@ namespace Client
             screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
             screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
             this.SetBounds(screenWidth - this.Width, 0, this.Width, this.Height);
+
+            checkProductMode();
+            this.Text = MsgrTitle;
+
             readconfig();
             LogFileCheck();
             Thread thread = new Thread(new ThreadStart(VersionCheck));
@@ -331,11 +353,52 @@ namespace Client
             timerForNotify.Tick += new EventHandler(timerForNotify_Tick);
             makeTransferNotiArea();
             StartService();
-
+            
         }
 
+        private void checkProductMode()
+        {
+            string temp = Process.GetCurrentProcess().ProcessName;
+            if (temp.IndexOf('.') < 0)
+            {
+                AppName = temp;
+            }
+            else
+            {
+                AppName = temp.Substring(0, temp.IndexOf('.'));
+            }
 
+            IsProductMode = !(AppName.ToUpper().Contains(CommonDef.STR_DEMO));
 
+            AppConfigName = string.Format(CommonDef.APP_CONFIG_NAME, temp);
+            AppConfigFullPath = Application.StartupPath + CommonDef.PATH_DELIM + AppConfigName;
+            if (IsProductMode)
+            {
+                AppRegName = CommonDef.REG_APP_NAME;
+                UpdateShortDir = CommonDef.UPDATE_DIR_PROD;
+                UpdateTargetDir = CommonDef.WORK_DIR + CommonDef.PATH_DELIM + CommonDef.UPDATE_DIR_PROD;
+                UpdateSourceDir = Application.StartupPath + CommonDef.PATH_DELIM +CommonDef.UPDATE_DIR_PROD;
+                XmlConfigFullPath = CommonDef.WORK_DIR + CommonDef.PATH_DELIM + CommonDef.CONFIG_DIR + CommonDef.PATH_DELIM + CommonDef.XML_CONFIG_PROD;
+                XmlConfigOrgFullPath = Application.StartupPath + CommonDef.PATH_DELIM + CommonDef.XML_CONFIG_PROD;
+                UpdateSourceFullPath = UpdateSourceDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
+                UpdateTargetFullPath = UpdateTargetDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
+                MsgrTitle = CommonDef.MSGR_TITLE_PROD;
+            }
+            else
+            {
+                AppRegName = CommonDef.REG_APP_NAME_DEMO;
+                UpdateShortDir = CommonDef.UPDATE_DIR_DEMO;
+                UpdateTargetDir = CommonDef.WORK_DIR + CommonDef.PATH_DELIM + CommonDef.UPDATE_DIR_DEMO;
+                UpdateSourceDir = Application.StartupPath + CommonDef.PATH_DELIM + CommonDef.UPDATE_DIR_DEMO;
+                XmlConfigFullPath = CommonDef.WORK_DIR + CommonDef.PATH_DELIM + CommonDef.CONFIG_DIR + CommonDef.PATH_DELIM + CommonDef.XML_CONFIG_DEMO;
+                XmlConfigOrgFullPath = Application.StartupPath + CommonDef.PATH_DELIM + CommonDef.XML_CONFIG_DEMO;
+                UpdateSourceFullPath = UpdateSourceDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
+                UpdateTargetFullPath = UpdateTargetDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
+                MsgrTitle = CommonDef.MSGR_TITLE_DEMO;
+            }
+            logWrite("Product Mode[" + AppName + "][" + IsProductMode + "]");
+
+        }
 
         private void makeTransferNotiArea()
         {
@@ -359,32 +422,32 @@ namespace Client
 
         void Client_Form_Validating(object sender, CancelEventArgs e)
         {
-
+            
         }
 
         private void killInitWD()
         {
             try
             {
-                Process[] pros = Process.GetProcessesByName("InitWD");
-                if (pros.Length > 0)
-                {
-                    foreach (Process pro in pros)
-                    {
-                        pro.Kill();
-                    }
-                }
-                else
-                {
-                    logWrite("InitWD 프로세스 못찾음");
-                }
+               Process[] pros = Process.GetProcessesByName("InitWD");
+               if (pros.Length > 0)
+               {
+                   foreach (Process pro in pros)
+                   {
+                       pro.Kill();
+                   }
+               }
+               else
+               {
+                   logWrite("InitWD 프로세스 못찾음");
+               }
             }
             catch (Exception ex)
             {
 
             }
         }
-
+       
         /// <summary>
         /// app.config xml 설정파일 정보 로드
         /// </summary>
@@ -392,18 +455,33 @@ namespace Client
         {
             try
             {
-                FtpHost = System.Configuration.ConfigurationSettings.AppSettings["FtpHost"].ToString();
-                tempFolder = System.Configuration.ConfigurationSettings.AppSettings["FtpLocalFolder"].ToString();
-                passwd = System.Configuration.ConfigurationSettings.AppSettings["FtpPass"].ToString();
-                FtpPort = int.Parse(System.Configuration.ConfigurationSettings.AppSettings["FtpPort"].ToString());
-                FtpUsername = System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].ToString();
-                updaterDir = System.Configuration.ConfigurationSettings.AppSettings["UpdaterDir"].ToString();
-                version = System.Configuration.ConfigurationSettings.AppSettings["FtpVersion"].ToString();
+                //FtpHost = System.Configuration.ConfigurationSettings.AppSettings["FtpHost"].ToString();
+                //tempFolder = System.Configuration.ConfigurationSettings.AppSettings["FtpLocalFolder"].ToString();
+                //passwd = System.Configuration.ConfigurationSettings.AppSettings["FtpPass"].ToString();
+                //FtpPort = int.Parse(System.Configuration.ConfigurationSettings.AppSettings["FtpPort"].ToString());
+                //FtpUsername = System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].ToString();
+                //updaterDir = System.Configuration.ConfigurationSettings.AppSettings["UpdaterDir"].ToString();
+                //version = System.Configuration.ConfigurationSettings.AppSettings["FtpVersion"].ToString();
                 top = System.Configuration.ConfigurationSettings.AppSettings["topmost"].ToString();
-                string temp = System.Configuration.ConfigurationSettings.AppSettings["nopop"].ToString();
-                if (temp.Equals("1"))
+                string sNopop = System.Configuration.ConfigurationSettings.AppSettings["nopop"].ToString();
+
+                FtpHost = CommonDef.FTP_HOST;
+                tempFolder = CommonDef.FTP_LOCAL_DIR;
+                passwd = CommonDef.FTP_PASS;
+                FtpPort = CommonDef.FTP_PORT;
+                FtpUsername = CommonDef.FTP_USERID;
+                updaterDir = UpdateTargetFullPath; //System.Configuration.ConfigurationSettings.AppSettings["UpdaterDir"].ToString();
+                version = CommonDef.FTP_VERSION;
+                
+                if (sNopop.Equals("1"))
                 {
                     this.nopop = true;
+                }
+
+                string sNopop_outbound = System.Configuration.ConfigurationSettings.AppSettings["nopop_outbound"].ToString();
+                if (sNopop_outbound.Equals("1"))
+                {
+                    this.nopop_outbound = true;
                 }
 
                 if (top.Equals("1"))
@@ -436,7 +514,7 @@ namespace Client
                     StreamReader sr = new StreamReader(st);
                     SVRver = sr.ReadLine();
                 }
-
+                logWrite("VersionCheck FtpHost = " + FtpHost);
                 logWrite("Server Version = " + SVRver);
                 logWrite("Client Version = " + version);
 
@@ -555,7 +633,7 @@ namespace Client
         }
 
 
-
+        
 
         private void SystemEvents_SessionEnding(object sender, Microsoft.Win32.SessionEndingEventArgs e)
         {
@@ -1676,7 +1754,7 @@ namespace Client
             this.MinimumSize = new System.Drawing.Size(298, 585);
             this.Name = "Client_Form";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "WeDo 메신저";
+            this.Text = "WeDo 메신저 데모버젼";
             this.Load += new System.EventHandler(this.Client_Form_Load);
             this.SizeChanged += new System.EventHandler(this.Client_Form_SizeChanged);
             this.Shown += new System.EventHandler(this.Client_Form_Shown);
@@ -1723,7 +1801,7 @@ namespace Client
 
         private void notifyIcon_Click(object sender, MouseEventArgs e)
         {
-
+            
             int pointx = System.Windows.Forms.StatusBar.MousePosition.X;
             int pointy = System.Windows.Forms.StatusBar.MousePosition.Y;
             if (e.Button == MouseButtons.Left)
@@ -1744,7 +1822,7 @@ namespace Client
                 this.Activate();
                 isHide = false;
                 firstCall = false;
-
+                
             }
             else
             {
@@ -1752,12 +1830,12 @@ namespace Client
             }
         }
 
-
-
-
+        
+        
+       
         #endregion
-
-
+        
+        
         private void login_Click(object sender, EventArgs e)
         {
             checkInfoForLogin();
@@ -2007,7 +2085,7 @@ namespace Client
 
                 receiverStart = true;
                 IPEndPoint sender = new IPEndPoint(IPAddress.Any, 8883);
-
+                
                 byte[] buffer = null;
 
 
@@ -2042,7 +2120,7 @@ namespace Client
                             logWrite("Receive() 에러 : " + e.ToString());
                     }
                 }
-
+                
                 if (connected == true)
                     logWrite("##경고## : Receiver 가 중단되었습니다. ");
             }
@@ -2198,7 +2276,7 @@ namespace Client
                     filesender = new IPEndPoint(IPAddress.Any, filereceiveport);
                     filesock = new UdpClient(filesender);
                 }
-
+                
                 filesock.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000);
 
                 try
@@ -2270,7 +2348,7 @@ namespace Client
                                     Invoke(intdele, rowIndex);
 
                                 }
-
+                                
                                 if (size >= filesize)  //파일 데이터를 모두 수신했는지 체크
                                 {
                                     if (filesender.Address.Equals(server.Address))
@@ -2400,7 +2478,7 @@ namespace Client
                 FileInfo fileinfo = new FileInfo(filename);
                 string dirname = fileinfo.DirectoryName;
                 System.Diagnostics.Process.Start(dirname);
-
+                
             }
             catch (Exception exception)
             {
@@ -2519,7 +2597,7 @@ namespace Client
         //    else
         //    {
         //        logWrite("ServerSocket is null!");
-
+               
         //    }
         //}
 
@@ -2530,7 +2608,7 @@ namespace Client
         /// <param name="list">파일 전송 대상자 목록</param>
         /// <param name="filename">파일명</param>
         /// <param name="timekey">파일전송시간(여러 파일전송작업 간 구분키가 됨)</param>
-        private void FileSendRequest(ArrayList list, string filename, string timekey)
+        private void FileSendRequest(ArrayList list, string filename, string timekey) 
         {
             try
             {
@@ -2897,17 +2975,17 @@ namespace Client
                         break;
 
                     case "g": //로그인 성공시 (g|name|team|company|com_cd)
-
+                        
                         connected = true;
 
                         stringDele changeProgressStyle = new stringDele(chageProgressbar);
                         Invoke(changeProgressStyle, "로딩중");
-                        setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config.xml", serverIP);
-                        setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config.xml", serverIP);
+                        setCRM_DB_HOST(XmlConfigOrgFullPath, serverIP);//Application.StartupPath + "\\MiniCTI_config_demo.xml", serverIP);
+                        setCRM_DB_HOST(XmlConfigFullPath, serverIP);//"c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", serverIP);
 
-                        FileInfo temp = new FileInfo(Application.StartupPath + "\\MiniCTI_config.xml");
+                        FileInfo temp = new FileInfo(XmlConfigOrgFullPath);//Application.StartupPath + "\\MiniCTI_config_demo.xml");
 
-                        FileInfo tempfileinfo = new FileInfo("C:\\MiniCTI\\config\\MiniCTI_config.xml");
+                        FileInfo tempfileinfo = new FileInfo(XmlConfigFullPath);//"C:\\MiniCTI\\config\\MiniCTI_config_demo.xml");
                         if (!tempfileinfo.Exists)
                         {
                             logWrite("MiniCTI config 파일 없음");
@@ -2918,30 +2996,16 @@ namespace Client
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName, true);
                         }
 
-                        string sampleExcelFile = "고객정보대장-샘플.xlsx";
-                        FileInfo tempExcel = new FileInfo(Application.StartupPath + "\\" + sampleExcelFile);
-
-                        FileInfo tempExcelfileinfo = new FileInfo("C:\\MiniCTI\\sample\\" + sampleExcelFile);
-                        if (!tempExcelfileinfo.Exists)
-                        {
-                            logWrite("고객정보대장-샘플 파일 없음");
-                            FileInfo file_copied = tempExcel.CopyTo(tempExcelfileinfo.FullName);
-                        }
-                        else
-                        {
-                            FileInfo file_copied = tempExcel.CopyTo(tempExcelfileinfo.FullName, true);
-                        }
-
                         myname = tempMsg[1];//서버측에서 전달된 이름 저장
                         myid = this.id.Text;
                         com_cd = tempMsg[4];
                         logWrite("로그인 성공! (" + DateTime.Now.ToString() + ")");
 
-
+                       
                         //개인 정보를 Client_Form 에 표시
                         FormTextCtrlDelegate FlushName = new FormTextCtrlDelegate(FlushInfo);
                         FormTextCtrlDelegate FlushTeam = new FormTextCtrlDelegate(Flushteam);
-
+                        
                         Invoke(FlushName, tempMsg[1]);
 
                         if (tempMsg[2].Length > 0)
@@ -2953,7 +3017,7 @@ namespace Client
                             Invoke(FlushTeam, tempMsg[3]);
                         }
 
-
+                       
 
                         this.KeyDown += new KeyEventHandler(Client_Form_KeyDown);
                         int count = this.Controls.Count;
@@ -2986,9 +3050,9 @@ namespace Client
                             PanelCtrlDelegate loginPanel = new PanelCtrlDelegate(LogInPanelVisible); //로그인 패널 컨트롤 호출용
                             PanelCtrlDelegate TreeViewPanel = new PanelCtrlDelegate(TreeViewVisible);  //memTreeView 컨트롤호출용
                             PanelCtrlDelegate btnCtrl = new PanelCtrlDelegate(ButtonCtrl);//각종 버튼 컨트롤호출용
-
+                            
                             Invoke(TreeViewPanel, true);
-
+                            
                             // 버튼 활성화
                             Invoke(btnCtrl, true);
 
@@ -3043,7 +3107,7 @@ namespace Client
                         string team = (string)TeamInfoList[tempMsg[1]];
 
                         int Port = 8883;
-                        logWrite("팀 : " + team + " 사용자 id : " + tempMsg[1] + "  port : " + Port.ToString());
+                        logWrite("팀 : "+team+ " 사용자 id : " + tempMsg[1] + "  port : " + Port.ToString());
 
                         //InList[tempMsg[1]] = server;   //로그인 리스트 테이블에 저장(key=id, value=IPEndPoint)
 
@@ -3136,7 +3200,7 @@ namespace Client
                         if (ChatFormList.ContainsKey(tempMsg[1]) && ChatFormList[tempMsg[1]] != null)
                         {
                             ChatForm form = (ChatForm)ChatFormList[tempMsg[1]];
-
+                            
                         }
 
                         break;
@@ -3162,7 +3226,7 @@ namespace Client
                             info["name"] = name;
                             info["senderid"] = tempMsg[4];
                             SendMsg("Y|" + tempMsg[1] + "|" + tempMsg[3] + "|" + this.myid, siep); //구성(Y|파일명|파일Key|수신자id)
-                            FileReceiver((object)info);
+                            FileReceiver((object)info);                            
                         }
                         downloadform.Show();
                         break;
@@ -3224,7 +3288,7 @@ namespace Client
                             ChangeStat change = new ChangeStat(ChangeMemStat);
                             Invoke(change, new object[] { tempMsg[1], "online" });
                             TeamInfoList[tempMsg[1]] = tempMsg[2];
-
+                            
                         }
                         catch (Exception e)
                         {
@@ -3252,13 +3316,13 @@ namespace Client
                             ArrangeCtrlDelegate notice = new ArrangeCtrlDelegate(ShowNoticeDirect);
                             Invoke(notice, new object[] { tempMsg });
                         }
-
+                      
                         break;
 
                     case "A": //부재중 정보 전달(A|mnum|fnum|nnum|tnum)
                         ArrangeCtrlDelegate ShowAbsentInfo = new ArrangeCtrlDelegate(ShowAbsentInfoNumber);
                         Invoke(ShowAbsentInfo, new object[] { tempMsg });
-
+                        
                         break;
 
                     case "Q"://안읽은 메모 리스트 (Q|sender;content;time;seqnum|sender;content;time;seqnum|...
@@ -3280,7 +3344,7 @@ namespace Client
                         break;
 
                     case "t": //"t|ntime†content†nmode†title†안읽은사람1:안읽은사람2:...|...
-
+                        
                         ArrangeCtrlDelegate ShowNoticeResultFromDB = new ArrangeCtrlDelegate(showNoticeResultFromDB);
                         Invoke(ShowNoticeResultFromDB, new object[] { tempMsg });
 
@@ -3319,14 +3383,17 @@ namespace Client
                         break;
 
                     case "Dial": //다이얼시 고객정보 팝업(Dial|ani)
-                        doublestringDele dialdele = new doublestringDele(Answer);
-                        Invoke(dialdele, new object[] { tempMsg[1], "2" });
+                        if (this.nopop_outbound == false)
+                        {
+                            doublestringDele dialdele = new doublestringDele(Answer);
+                            Invoke(dialdele, new object[] { tempMsg[1], "2" });
+                        }
                         break;
 
                     case "Answer": //offhook시 고객정보 팝업(Answer|ani|type)
                         doublestringDele answerdele = new doublestringDele(Answer);
                         Invoke(answerdele, new object[] { tempMsg[1], tempMsg[2] });
-
+                        
                         break;
 
                     case "Abandon": //Abandon 발생시
@@ -3348,7 +3415,7 @@ namespace Client
                         {
                             //notifyTransfer(tempMsg);
                             ArrangeCtrlDelegate passdele = new ArrangeCtrlDelegate(notifyTransfer);
-                            Invoke(passdele, new object[] { tempMsg });
+                            Invoke(passdele, new object[]{tempMsg});
                         }
                         break;
 
@@ -3399,11 +3466,11 @@ namespace Client
                 notifyform.Focus();
                 notifyform.Show();
                 timerForNotify.Start();
-
+                
             }
             catch (Exception ex)
             {
-
+                
             }
         }
 
@@ -3462,7 +3529,7 @@ namespace Client
                     TransferNotiForm miniform = new TransferNotiForm();
                     miniform.pbx_icon.Image = global::Client.Properties.Resources.img_customer;
                     miniform.MouseClick += new MouseEventHandler(miniform_MouseClick);
-                    miniform.pbx_icon.MouseClick += new MouseEventHandler(pbx_icon_MouseClick_for_Transfer);
+                    miniform.pbx_icon.MouseClick+=new MouseEventHandler(pbx_icon_MouseClick_for_Transfer);
                     miniform.label_Customer.MouseClick += new MouseEventHandler(label_Customer_MouseClick);
                     miniform.label_from.MouseClick += new MouseEventHandler(label_Customer_MouseClick);
                     miniform.label_Customer.Text = notifyform.label_Customer.Text;
@@ -3659,7 +3726,7 @@ namespace Client
             {
                 logWrite(ex.ToString());
             }
-
+           
         }
 
         /// <summary>
@@ -3684,7 +3751,7 @@ namespace Client
                     ani = temp;
                 }
                 doublestringDele dele = new doublestringDele(showCustomerPopup);
-                Invoke(dele, new object[] { ani, "1" });
+                Invoke(dele, new object[]{ani, "1"});
 
                 logWrite("miniform.Top = " + miniform.Top.ToString());
                 if (TransferNotiArea.ContainsKey(miniform.Top.ToString()))
@@ -3710,7 +3777,7 @@ namespace Client
 
         }
 
-        private void showTransferInfo(string ani, string senderid, string tong_date, string tong_time)
+        private void showTransferInfo(string ani, string senderid , string tong_date, string tong_time)
         {
             logWrite("showTransferInfo(" + ani + ", " + senderid + ", " + tong_date + ", " + tong_time);
             try
@@ -3753,7 +3820,7 @@ namespace Client
 
                 Invoke(dele, new object[] { notifyform.label_ani.Text, notifyform.label_senderid.Text, notifyform.label_TONGDATE.Text, notifyform.label_TONGTIME.Text });
                 notifyform.Close();
-
+            
             }
         }
 
@@ -3815,7 +3882,7 @@ namespace Client
             logWrite("com_cd = " + this.com_cd);
             logWrite("myid = " + this.myid);
             logWrite("pass = " + tbx_pass.Text);
-
+            
             cm.SetUserInfo(this.com_cd, this.myid, tbx_pass.Text, serverIP, socket_port_crm);
 
             NoParamDele dele = new NoParamDele(startCRMmanager);
@@ -3827,7 +3894,7 @@ namespace Client
             try
             {
                 crm_main = new FRM_MAIN();
-
+                
                 crm_main.StartPosition = FormStartPosition.Manual;
                 crm_main.SetBounds(0, 0, crm_main.Width, crm_main.Height);
                 crm_main.Activate();
@@ -3839,7 +3906,7 @@ namespace Client
             }
         }
 
-
+       
         /// <summary>
         /// 발신자 표시 처리
         /// </summary>
@@ -3882,9 +3949,9 @@ namespace Client
                 popform.TopLevel = true;
                 popform.Show();
                 //getForegroundWindow();
-
-
-
+                
+               
+                
                 t1.Start();
 
             }
@@ -3897,7 +3964,7 @@ namespace Client
 
         private void Answer(string ani, string calltype)
         {
-
+           
             if (popform != null)
             {
                 t1.Stop();
@@ -3907,7 +3974,7 @@ namespace Client
                     showAnswerCallInfo(ani, name);
                 }
                 popform.Close();
-
+                
             }
             //cm.POPUP(ani, DateTime.Now.ToString("yyyyMMddhhmmss"), "1");
             //cm.SetUserInfo(this.com_cd, this.myid, tbx_pass.Text, serverIP, socket_port_crm);
@@ -4050,7 +4117,7 @@ namespace Client
                 //miniform.label_ani.Text = notifyform.label_ani.Text;
                 //miniform.label_date.Text = notifyform.label_TONGDATE.Text;
                 //miniform.label_time.Text = notifyform.label_TONGTIME.Text;
-                miniform.label_from.Text = "시간 : " + DateTime.Now.ToShortTimeString();
+                miniform.label_from.Text = "시간 : "+ DateTime.Now.ToShortTimeString();
                 screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
                 screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
                 miniform.SetBounds(screenWidth - miniform.Width, height_point, miniform.Width, miniform.Height);
@@ -4134,7 +4201,7 @@ namespace Client
                     }
                 }
                 miniform.Close();
-
+                
             }
             catch (Exception ex)
             {
@@ -4155,10 +4222,10 @@ namespace Client
             {
                 GetWindowThreadProcessId(hwnd, out pid);
                 System.Diagnostics.Process CurProc = System.Diagnostics.Process.GetProcessById((int)pid);
-                logWrite("GetForegroundWindow() : " + CurProc.ProcessName);
-
+                logWrite("GetForegroundWindow() : "+ CurProc.ProcessName);
+                
             }
-
+                
         }
 
         private void crm_main_FormClosing(object sender, FormClosingEventArgs e)
@@ -4168,10 +4235,10 @@ namespace Client
                 e.Cancel = true;
                 crm_main.Hide();
             }
-
+           
         }
 
-
+        
 
         private void Client_Form_onAnswerEvent(string ani)
         {
@@ -4187,7 +4254,7 @@ namespace Client
             {
                 t1.Stop();
                 popform.Close();
-
+                
             }
 
         }
@@ -4198,7 +4265,7 @@ namespace Client
             {
                 t1.Stop();
                 popform.Close();
-
+               
             }
 
 
@@ -4233,7 +4300,7 @@ namespace Client
 
             if (missedlistform != null)
             {
-
+                
             }
         }
 
@@ -4453,14 +4520,14 @@ namespace Client
 
         private void TimerStart()
         {
-
+            
         }
 
 
 
         private void nform_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            
             /*
             Form form = (Form)sender;
             int count = form.Controls.Count;
@@ -4972,8 +5039,8 @@ namespace Client
 
                 SendMsg("14|" + seqnum, server);
                 noreceiveboardform.dgv_notice.Rows.RemoveAt(rowIndex);
-
-
+                
+                
                 int mnum = Convert.ToInt32(NRnotice.Text);
                 if (mnum != 0)
                 {
@@ -5048,7 +5115,7 @@ namespace Client
                         string filename = array[2];
                         string time = array[3];
                         string filesize = array[4];
-
+                        
                         string name = getName(sender);
                         int rownum = noreceiveboardform.dgv_file.Rows.Add(new object[] { filename, filesize, name + "(" + sender + ")", time });
                         DataGridViewRow row = noreceiveboardform.dgv_file.Rows[rownum];
@@ -5204,7 +5271,7 @@ namespace Client
                         string time = array[2];
                         string seqnum = array[3];
                         string name = getName(sender);
-
+                        
                         string[] temp = content.Split('&');
                         int rownum = 0;
                         if (temp.Length > 2)
@@ -5219,7 +5286,7 @@ namespace Client
                             DataGridViewRow row = noreceiveboardform.dgv_transfer.Rows[rownum];
                             row.Tag = seqnum;
                         }
-
+                        
                     }
                 }
                 else
@@ -5227,7 +5294,7 @@ namespace Client
                     noreceiveboardform.panel_trans.Enabled = true;
                     noreceiveboardform.dgv_transfer.Visible = true;
                     noreceiveboardform.label_trans.Text = "부재중 이관 (" + this.NRtrans.Text + ")";
-                    noreceiveboardform.dgv_transfer.CellMouseClick += new DataGridViewCellMouseEventHandler(dgv_transfer_CellMouseClick);
+                    noreceiveboardform.dgv_transfer.CellMouseClick+=new DataGridViewCellMouseEventHandler(dgv_transfer_CellMouseClick);
 
                     for (int i = 1; i < tempMsg.Length; i++)
                     {
@@ -5320,10 +5387,10 @@ namespace Client
                     doublestringDele answerdele = new doublestringDele(Answer);
                     Invoke(answerdele, new object[] { ani, "3" });
                 }
-
+               
 
                 noreceiveboardform.dgv_transfer.Rows.RemoveAt(rowIndex);
-
+                
                 //선택한 부재중 이관 row 관련 DB 삭제 요청
                 SendMsg("14|" + temp[0], server);
 
@@ -5362,7 +5429,7 @@ namespace Client
                 string name = ar1[0];
                 string id = ar2[0];
                 string msg = mitem.SubItems[3].Text;
-                string msgtime = mitem.SubItems[2].Text;
+                string msgtime=mitem.SubItems[2].Text;
                 string[] array = new string[] { "m", name, id, msg };
                 MakeMemo(array);
 
@@ -5373,7 +5440,7 @@ namespace Client
                 int mnum = Convert.ToInt32(NRmemo.Text);
                 if (mnum != 0)
                 {
-                    NRmemo.Text = (mnum - 1).ToString();
+                    NRmemo.Text=(mnum - 1).ToString();
                 }
             }
             catch (Exception exception)
@@ -5403,7 +5470,7 @@ namespace Client
                 string ntime = mitem.SubItems[4].Text;
                 string seqnum = mitem.Tag.ToString();
                 string title = mitem.SubItems[1].Text;
-                string[] array = new string[] { "r", msg, id, mode, ntime, seqnum, title };  //n|메시지|발신자id|mode|seqnum|title
+                string[] array = new string[] { "r", msg, id, mode, ntime, seqnum, title};  //n|메시지|발신자id|mode|seqnum|title
                 ShowNotice(array);
 
                 SendMsg("14|" + seqnum, server);
@@ -5527,7 +5594,7 @@ namespace Client
         public void Flushteam(string Name)
         {
             string clientName = Name;
-            team.Text = clientName;
+            team.Text = clientName ;
         }
 
 
@@ -5547,7 +5614,7 @@ namespace Client
             pic_title.Visible = value;
 
             panel_logon.Visible = !value;
-
+            
         }
 
 
@@ -5683,7 +5750,7 @@ namespace Client
             try
             {
                 int nodeNum = memTree.Nodes.Count;
-                TreeNode node = null;
+                TreeNode node=null;
                 if (team.Length != 0)
                 {
                     if (!memTree.Nodes.ContainsKey(team))
@@ -5754,12 +5821,16 @@ namespace Client
             string info = "8|" + this.myid + "|" + this.mypass + "|" + this.extension + "|" + local.ToString();
             SendMsg(info, server);
 
-            setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "id", this.myid);
-            setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "extension", this.extension);
+            //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "id", this.myid);
+            setConfigXml(AppConfigFullPath, "id", this.myid);
+            //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "extension", this.extension);
+            setConfigXml(AppConfigFullPath, "extension", this.extension);
             if (cbx_pass_save.Checked == true)
             {
-                setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "pass", this.mypass);
-                setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "save_pass", "1");
+                //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "pass", this.mypass);
+                setConfigXml(AppConfigFullPath, "pass", this.mypass);
+                //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "save_pass", "1");
+                setConfigXml(AppConfigFullPath, "save_pass", "1");
             }
         }
 
@@ -5955,7 +6026,7 @@ namespace Client
             try
             {
                 TextBox msgBox = (TextBox)sender;
-                if (e.Modifiers == Keys.Alt && e.KeyData == Keys.Enter)
+                if (e.Modifiers == Keys.Alt && e.KeyData==Keys.Enter)
                 {
                     msgBox.AppendText("\r\n");
                 }
@@ -5973,7 +6044,7 @@ namespace Client
 
                         for (int i = 0; i < num; i++)
                         {
-                            if ("txtbox_exam".Equals(msgBox.Parent.Controls[i].Name))
+                            if ("txtbox_exam".Equals(msgBox.Parent.Controls[i].Name)) 
                             {
                                 exam = (TextBox)msgBox.Parent.Controls[i];//대화글 표시설정 정보 가져오기
                                 break;
@@ -6051,10 +6122,10 @@ namespace Client
                                 {
                                     RichTextBox box = (RichTextBox)msgBox.Parent.Controls[i];
                                     TextBox tempbox = new TextBox();
-                                    string mymsg = myname + " 님의 말 :";
+                                    string mymsg = myname+" 님의 말 :";
                                     tempbox.Text = mymsg;
                                     int lines = box.Lines.Length;
-                                    box.AppendText(mymsg + "\r\n");
+                                    box.AppendText(mymsg +"\r\n");
                                     int findnum = box.Find(mymsg, RichTextBoxFinds.Reverse); //대화창에서 자기말 태크찾기
                                     box.SelectionBackColor = Color.Black;
                                     box.Select(findnum, mymsg.Length);
@@ -6071,7 +6142,7 @@ namespace Client
                                     box.SelectionColor = exam.ForeColor;
                                     box.SelectionFont = exam.Font;
                                     box.ScrollToCaret();
-
+                                    
                                     break;
                                 }
                             }
@@ -6102,7 +6173,7 @@ namespace Client
             {
                 logWrite(id + " 상태값 변경 오류 : " + e.ToString());
             }
-
+     
         }
 
         /// <summary>
@@ -6409,7 +6480,7 @@ namespace Client
                 chatForm.Text = chatter;
                 chatForm.txtbox_exam.Font = txtfont;
                 chatForm.txtbox_exam.ForeColor = txtcolor;
-                chatForm.Formkey.Text = DateTime.Now.ToString() + "!" + this.myid;
+                chatForm.Formkey.Text = DateTime.Now.ToString() +"!"+ this.myid;
                 logWrite("Formkey 생성 : <" + chatForm.Formkey.Text + ">");
                 ToolTip tip = new ToolTip();
                 tip.SetToolTip(chatForm.BtnAddChatter, "대화 상대방 추가");
@@ -6727,8 +6798,10 @@ namespace Client
             {
                 string c_color = color.Name;
                 string c_font = font.ToHfont().ToInt32().ToString();
-                setConfigXml("WDMsg_Client.exe.config", "custom_color", c_color);
-                setConfigXml("WDMsg_Client.exe.config", "custom_font", c_font);
+                //setConfigXml("WDMsg_Client_Demo.exe.config", "custom_color", c_color);
+                setConfigXml(AppConfigFullPath, "custom_color", c_color);
+                //setConfigXml("WDMsg_Client_Demo.exe.config", "custom_font", c_font);
+                setConfigXml(AppConfigFullPath, "custom_font", c_font);
             }
             catch (Exception ex)
             {
@@ -6752,7 +6825,7 @@ namespace Client
             {
                 logWrite("getCustomColor Error : " + ex.ToString());
             }
-
+            
             return c;
         }
 
@@ -6779,7 +6852,7 @@ namespace Client
         {
             Button button = (Button)sender;
             Form form = (Form)button.Parent;
-            int num = button.Parent.Controls.Count;
+            int num=button.Parent.Controls.Count;
             TextBox box = null;
 
             for (int i = 0; i < num; i++)
@@ -6792,10 +6865,10 @@ namespace Client
 
             ColorDialog colorDialog = new ColorDialog();
             colorDialog.SolidColorOnly = true;
-            DialogResult result = colorDialog.ShowDialog(form);
+            DialogResult result=colorDialog.ShowDialog(form);
             if (result == DialogResult.OK)
             {
-                box.ForeColor = colorDialog.Color;
+                box.ForeColor=colorDialog.Color;
             }
         }
 
@@ -6822,11 +6895,11 @@ namespace Client
             {
                 box.ForeColor = fontDialog.Color;
                 box.Font = fontDialog.Font;
-                box.Text = "가abAB";
+                box.Text="가abAB";
             }
         }
 
-
+       
         /// <summary>
         /// 사용자가 다수의 상대방과 대화하기를 요청했을 경우 대화창 생성
         /// </summary>
@@ -6970,7 +7043,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int num = button.Parent.Controls.Count;
                 ListBox addbox = null;
                 ListBox currbox = null;
@@ -7013,7 +7086,7 @@ namespace Client
 
                 ChatForm form = (ChatForm)ChatFormList[formkey];
 
-                if (form.ChattersTree != null && form.ChattersTree.Nodes != null && form.ChattersTree.Nodes.Count != 0)
+                if (form.ChattersTree!=null&&form.ChattersTree.Nodes!=null&&form.ChattersTree.Nodes.Count != 0)
                 {
                     TreeNodeCollection col = form.ChattersTree.Nodes;
                     foreach (TreeNode node in col)
@@ -7049,7 +7122,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int num = button.Parent.Controls.Count;
                 ListBox addbox = null;
                 ListBox currbox = null;
@@ -7137,7 +7210,7 @@ namespace Client
                 ListBox currbox = null;
                 ArrayList list = new ArrayList();
                 string formkey = null;
-
+                
                 for (int i = 0; i < num; i++)
                 {
                     if (button.Parent.Controls[i].Name.Equals("formkey"))
@@ -7178,7 +7251,7 @@ namespace Client
                 {
                     receiverArray = form.txtbox_receiver.Text.Split(';');
                 }
-                if (receiverArray != null && receiverArray.Length != 0)
+                if (receiverArray != null&&receiverArray.Length!=0)
                 {
                     foreach (object obj in list)
                     {
@@ -7480,7 +7553,7 @@ namespace Client
                 GetMember getmember = new GetMember(getMember);
                 Hashtable memTable = (Hashtable)Invoke(getmember, teamname);
                 int num = box.Parent.Controls.Count;
-                ListBox addbox = null;
+                ListBox addbox=null;
 
                 for (int i = 0; i < num; i++)
                 {
@@ -7569,7 +7642,7 @@ namespace Client
 
         private string[] getTeam()
         {
-            int teamnum = memTree.Nodes.Count;
+            int teamnum=memTree.Nodes.Count;
             string[] teamArray = new string[teamnum];
             for (int i = 0; i < teamnum; i++)
             {
@@ -7583,7 +7656,7 @@ namespace Client
             Hashtable memTable = new Hashtable();
             if (treesource.ContainsKey(teamname))
             {
-                ArrayList list = (ArrayList)treesource[teamname];
+                ArrayList list=(ArrayList)treesource[teamname];
                 foreach (object obj in list)
                 {
                     string item = (string)obj;
@@ -7596,7 +7669,7 @@ namespace Client
             return memTable;
         }
 
-
+       
 
         private void BtnConfirm_Click(object sender, MouseEventArgs e)
         {
@@ -7696,7 +7769,7 @@ namespace Client
 
         private void Addchatter(string id, string name, ChatForm form)
         {
-            TreeNode[] nodearray = form.ChattersTree.Nodes.Find(id, false);
+            TreeNode[] nodearray=form.ChattersTree.Nodes.Find(id, false);
 
             if (nodearray != null && nodearray.Length != 0)
             {
@@ -7801,7 +7874,7 @@ namespace Client
 
                 ChatFormList.Remove(key);
                 logWrite("채팅창 닫음으로 key=" + key + " ChatterList 테이블에서 삭제");
-
+               
             }
             catch (Exception exception)
             {
@@ -7811,7 +7884,7 @@ namespace Client
 
         private void Addmsg(string msg, ChatForm form)  //msg(d|Formkey|id/id/...|발신자name|메시지
         {
-            string[] temp = msg.Split('|');
+            string [] temp = msg.Split('|');
             string sendername = temp[0];
             RichTextBox box = form.chatBox;
             string sendermsg = sendername + " 님의 말 :";
@@ -7840,7 +7913,8 @@ namespace Client
             {
                 MemoForm memoForm = new MemoForm();
                 memoForm.Text = tempMemo[1] + "님의 쪽지";
-                memoForm.MemoCont.Text = tempMemo[3];
+                //memoForm.MemoCont.Text = tempMemo[3];  
+                memoForm.MemoCont.Lines = tempMemo[3].Split(new string[] {Environment.NewLine}, StringSplitOptions.None); //줄바꿈 지원 2012.9.1
                 memoForm.senderid.Text = tempMemo[2];
                 memoForm.MemoRe.KeyUp += new KeyEventHandler(SendMemo);
                 memoForm.Memobtn.MouseClick += new MouseEventHandler(Memobtn_Click);
@@ -7946,7 +8020,7 @@ namespace Client
                 {
                     TextBox send = (TextBox)sender;
                     bool MemoSendAvailable = false;
-                    TextBox receiverbox = null;
+                    TextBox receiverbox=null;
 
                     for (int i = 0; i < send.Parent.Controls.Count; i++)
                     {
@@ -7982,7 +8056,7 @@ namespace Client
                                             string[] array = tempID[n].Split('(');
                                             string[] array1 = array[1].Split(')');
                                             string reID = array1[0];
-
+                                            
                                             if (InList.ContainsKey(reID) && InList[reID] != null)
                                             {
                                                 SendMsg(msg + "|" + reID, server);
@@ -8000,9 +8074,9 @@ namespace Client
                                 }
                                 break;
                             }
-
+                            
                         }
-
+                        
                     }
                     else
                     {
@@ -8086,7 +8160,7 @@ namespace Client
                         string noticeid = DateTime.Now.ToString();
                         if (isNomal == true)
                         {
-                            MakeNoticeResult(noticeid, title, box.Text.Trim(), "일반");
+                            MakeNoticeResult(noticeid, title, box.Text.Trim() ,"일반");
                             SendMsg("6|" + box.Text + "|" + this.myid + "|n" + "|" + noticeid + "|" + title, server);
                         }
                         else
@@ -8249,7 +8323,7 @@ namespace Client
         private void showNoticeResultFromDB(string[] tempMsg)// ntime†content†nmode†title†안읽은사람1:안읽은사람2:...
         {
 
-            logWrite("showNoticeResultFromDB 실행");
+            logWrite("showNoticeResultFromDB 실행"); 
             string noticetime = "";
             string title = "";
             string content = "";
@@ -8671,7 +8745,7 @@ namespace Client
                                 logWrite("쪽지 메시지 생성 : " + msg);
 
                                 string[] tempID = receiverbox.Text.Split(';');
-
+                                
                                 for (int n = 0; n < tempID.Length; n++)
                                 {
                                     if (tempID[n].Length != 0)
@@ -8731,7 +8805,7 @@ namespace Client
                 TextBox box = (TextBox)sender;
                 if (e.KeyData == Keys.Enter || (e.Modifiers == Keys.Control && e.KeyCode == Keys.S))
                 {
-
+                   
                     string msg = "19|" + this.myname + "|" + this.myid + "|" + box.Text.Trim();
                     string smsg = "4|" + this.myname + "|" + this.myid + "|" + box.Text.Trim();
                     for (int i = 0; i < box.Parent.Controls.Count; i++)
@@ -8886,7 +8960,7 @@ namespace Client
 
         private void MnSendFile_Click(object sender, EventArgs e)
         {
-
+            
             Hashtable list = new Hashtable();
             MakeSendFileForm(list);
         }
@@ -9169,7 +9243,7 @@ namespace Client
             {
                 AddMemberForm addform = new AddMemberForm();
                 addform.BtnConfirm.Click += new EventHandler(BtnConfirmForFile_Click);
-                addform.BtnCancel.Click += new EventHandler(BtnCancel_Click_forFile);
+                addform.BtnCancel.Click+=new EventHandler(BtnCancel_Click_forFile);
                 addform.radiobt_g.Click += new EventHandler(radiobt_g_Click);
                 addform.radiobt_con.Click += new EventHandler(radiobt_con_Click);
                 addform.radiobt_all.Click += new EventHandler(radiobt_all_Click);
@@ -9211,7 +9285,7 @@ namespace Client
                 }
                 addform.formkey.Text = formkey;
                 addform.Show(form);
-
+                
             }
             catch (Exception e)
             {
@@ -9223,7 +9297,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int controlsNum = button.Parent.Controls.Count;
                 string key = null;
                 for (int i = 0; i < controlsNum; i++)
@@ -9307,9 +9381,9 @@ namespace Client
         {
             try
             {
-
-
-
+                
+                
+                
             }
             catch (Exception exception)
             {
@@ -9324,20 +9398,25 @@ namespace Client
             {
                 if (configform.cbx_autostart.CheckState == CheckState.Checked)
                 {
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "autostart", "1");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "autostart", "1");
+                    setConfigXml(AppConfigFullPath, "autostart", "1");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("autostart", "1");
-                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                    rkApp.SetValue("WeDo", Application.ExecutablePath.ToString());
+                    //RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey(CommonDef.REG_CUR_USR_RUN, true);
+                    //rkApp.SetValue("WeDo", Application.ExecutablePath.ToString());
+                    rkApp.SetValue(AppRegName, Application.ExecutablePath.ToString());
                     rkApp.Close();
                 }
                 else
                 {
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "autostart", "0");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "autostart", "0");
+                    setConfigXml(AppConfigFullPath, "autostart", "0");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("autostart", "0");
-                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                    if (rkApp.GetValue("WeDo") != null)
+                    //RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey(CommonDef.REG_CUR_USR_RUN, true);
+                    if (rkApp.GetValue(AppRegName) != null)
                     {
-                        rkApp.DeleteValue("WeDo");
+                        rkApp.DeleteValue(AppRegName);
                     }
                     rkApp.Close();
                 }
@@ -9345,27 +9424,46 @@ namespace Client
                 if (configform.cbx_topmost.CheckState == CheckState.Checked)
                 {
                     this.TopMost = true;
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "topmost", "1");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "topmost", "1");
+                    setConfigXml(AppConfigFullPath, "topmost", "1");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("topmost", "1");
                 }
                 else
                 {
                     this.TopMost = false;
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "topmost", "0");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "topmost", "0");
+                    setConfigXml(AppConfigFullPath, "topmost", "0");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("topmost", "0");
                 }
 
                 if (configform.cbx_nopop.CheckState == CheckState.Checked)
                 {
                     this.nopop = true;
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "nopop", "1");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "nopop", "1");
+                    setConfigXml(AppConfigFullPath, "nopop", "1");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("nopop", "1");
                 }
                 else
                 {
                     this.nopop = false;
-                    setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "nopop", "0");
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "nopop", "0");
+                    setConfigXml(AppConfigFullPath, "nopop", "0");
                     System.Configuration.ConfigurationSettings.AppSettings.Set("nopop", "0");
+                }
+
+                if (configform.cbx_nopop_outbound.CheckState == CheckState.Checked)
+                {
+                    this.nopop_outbound = true;
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "nopop_outbound", "1");
+                    setConfigXml(AppConfigFullPath, "nopop_outbound", "1");
+                    System.Configuration.ConfigurationSettings.AppSettings.Set("nopop_outbound", "1");
+                }
+                else
+                {
+                    this.nopop_outbound = false;
+                    //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "nopop_outbound", "0");
+                    setConfigXml(AppConfigFullPath, "nopop_outbound", "0");
+                    System.Configuration.ConfigurationSettings.AppSettings.Set("nopop_outbound", "0");
                 }
 
                 configform.Close();
@@ -9381,7 +9479,7 @@ namespace Client
         {
             try
             {
-
+               
             }
             catch (Exception ex)
             {
@@ -9393,7 +9491,7 @@ namespace Client
         {
             try
             {
-
+               
             }
             catch (Exception ex)
             {
@@ -9415,9 +9513,12 @@ namespace Client
                 {
                     tempip = "localhost";
                 }
-                setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "serverip", tempip);
-                setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config.xml", tempip);
-                setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config.xml", tempip);
+                //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "serverip", tempip);
+                setConfigXml(AppConfigFullPath, "serverip", tempip);
+                //setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", tempip);
+                setCRM_DB_HOST(XmlConfigFullPath, tempip);
+                //setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config_demo.xml", tempip);
+                setCRM_DB_HOST(XmlConfigOrgFullPath, tempip);
                 serverIP = tempip;
                 System.Configuration.ConfigurationSettings.AppSettings.Set("serverip", serverIP);
 
@@ -9431,7 +9532,7 @@ namespace Client
             }
         }
 
-
+        
 
         private void btnSetting_Click(object sender, System.EventArgs e)
         {
@@ -9445,7 +9546,7 @@ namespace Client
                     if ("tb_Address".Equals(button.Parent.Controls[i].Name))
                     {
                         serverIP = button.Parent.Controls[i].Text;
-
+                        
                         break;
                     }
                 }
@@ -9472,32 +9573,26 @@ namespace Client
                     logDir.Create();
                 }
 
-                DirectoryInfo sampleDir = new DirectoryInfo(di.FullName + "\\sample");
-                if (!sampleDir.Exists)
-                {
-                    sampleDir.Create();
-                }
-
                 DirectoryInfo configDir = new DirectoryInfo(di.FullName + "\\config");
                 if (!configDir.Exists)
                 {
                     configDir.Create();
                 }
 
-                DirectoryInfo updaterDir = new DirectoryInfo(di.FullName + "\\WeDoUpdater");
+                DirectoryInfo updaterDir = new DirectoryInfo(di.FullName + CommonDef.PATH_DELIM + UpdateShortDir);
                 if (!updaterDir.Exists)
                 {
                     updaterDir.Create();
                 }
 
                 FileInfo[] files = null;
-                di = new DirectoryInfo(Application.StartupPath + "\\WeDoUpdater");
+                di = new DirectoryInfo(UpdateSourceDir);//Application.StartupPath + "\\WeDoUpdater_Demo");
                 if (di.Exists)
                 {
                     files = di.GetFiles();
                     foreach (FileInfo fi in files)
                     {
-                        FileInfo finfo = new FileInfo("C:\\MiniCTI\\WeDoUpdater\\" + fi.Name);
+                        FileInfo finfo = new FileInfo(UpdateTargetDir + CommonDef.PATH_DELIM + fi.Name);//"C:\\MiniCTI\\WeDoUpdater_Demo\\" + fi.Name);
 
                         fi.CopyTo(finfo.FullName, true);
 
@@ -9517,21 +9612,21 @@ namespace Client
                     logWrite(date + ".txt 파일 생성");
                 }
 
-                FileInfo temp = new FileInfo(Application.StartupPath + "\\MiniCTI_config.xml");
+                FileInfo temp = new FileInfo(XmlConfigOrgFullPath);//Application.StartupPath + "\\MiniCTI_config_demo.xml");
 
-                FileInfo CRMCFGfileinfo = new FileInfo("C:\\MiniCTI\\config\\MiniCTI_config.xml");
+                FileInfo CRMCFGfileinfo = new FileInfo(XmlConfigFullPath);//"C:\\MiniCTI\\config\\MiniCTI_config_demo.xml");
                 if (!CRMCFGfileinfo.Exists)
                 {
                     logWrite("MiniCTI config 파일 없음");
                     FileInfo file_copied = temp.CopyTo(CRMCFGfileinfo.FullName);
                 }
 
-
+                
             }
             catch (Exception e)
             {
                 logWrite(e.ToString());
-
+     
             }
         }
 
@@ -9549,7 +9644,7 @@ namespace Client
                 if (!privatefolder.Exists)
                 {
                     privatefolder.Create();
-                    logWrite("개인 폴더 생성 : " + this.myid);
+                    logWrite("개인 폴더 생성 : "+this.myid);
                 }
                 if (!memodi.Exists)
                 {
@@ -9557,7 +9652,7 @@ namespace Client
                     logWrite("Memo 저장 폴더 생성");
                 }
                 string today = DateTime.Now.ToShortDateString();
-                FileInfo memofile = new FileInfo(@"C:\MiniCTI\" + this.myid + "\\Memo\\" + today + ".mem");
+                FileInfo memofile = new FileInfo(@"C:\MiniCTI\"+this.myid+"\\Memo\\" + today + ".mem");
                 if (!memofile.Exists)
                 {
                     memofile.Create();
@@ -9593,7 +9688,7 @@ namespace Client
             try
             {
                 privatefolder = new DirectoryInfo(@"C:\MiniCTI\" + id.Text);
-                dialogdi = new DirectoryInfo(@"C:\MiniCTI\" + id.Text + "\\Dialog");
+                dialogdi=new DirectoryInfo(@"C:\MiniCTI\" + id.Text+"\\Dialog");
                 if (!privatefolder.Exists)
                 {
                     privatefolder.Create();
@@ -9607,9 +9702,9 @@ namespace Client
                 }
 
                 string today = DateTime.Now.ToShortDateString();
-                string month = today.Substring(0, 7);
+                string month=today.Substring(0, 7);
 
-                MonthFolder = new DirectoryInfo(@"C:\MiniCTI\" + id.Text + "\\Dialog\\" + month);
+                MonthFolder = new DirectoryInfo(@"C:\MiniCTI\"+id.Text+"\\Dialog\\" + month);
                 if (!MonthFolder.Exists)
                 {
                     MonthFolder.Create();
@@ -9631,7 +9726,7 @@ namespace Client
             try
             {
                 clog += "( " + DateTime.Now.ToString() + ")" + "\r\n";
-
+                
                 if (Log.logBox.InvokeRequired)
                 {
                     WriteLog writelog = new WriteLog(Log.logBox.AppendText);
@@ -9639,12 +9734,12 @@ namespace Client
                     Invoke(writelog, clog);
                 }
                 else Log.logBox.AppendText(clog);
-
+                
                 logFileWrite(clog);
             }
             catch (Exception e)
             {
-
+                
             }
         }
 
@@ -9704,7 +9799,7 @@ namespace Client
                     MemoFileCheck();
                 }
                 else
-                {
+                {     
                     FileInfo[] files = info.GetFiles("*.mem");
                     foreach (FileInfo file in files)
                     {
@@ -9729,7 +9824,7 @@ namespace Client
         {
             try
             {
-                string[] array = dialogkey.Split('!');
+                string[] array=dialogkey.Split('!');
                 StreamWriter sw = null;
                 if (!dialogdi.Exists || MonthFolder == null || DayFolder == null)
                 {
@@ -9740,7 +9835,7 @@ namespace Client
                     DialogFileCheck();
                 }
                 string today = DateTime.Now.ToShortDateString();
-                string now = DateTime.Now.Hour.ToString() + "시_" + DateTime.Now.Minute.ToString() + "분_" + DateTime.Now.Second.ToString() + "초";
+                string now = DateTime.Now.Hour.ToString() +"시_"+ DateTime.Now.Minute.ToString() +"분_"+ DateTime.Now.Second.ToString()+"초";
                 string dkey = now + "!" + person;
                 string month = today.Substring(0, 7);
                 logWrite("DialogFileWrite dkey = " + dkey);
@@ -9919,19 +10014,19 @@ namespace Client
 
         public void LogoutFormClose()  //로그아웃 전에 열린 폼 닫기 및 정보테이블 삭제
         {
-            //private Hashtable ChatFormList = new Hashtable();  //채팅창  key=id, value=chatform
-            //private Hashtable MemoFormList = new Hashtable(); //key=time, value=SendMemoForm
-            //private Hashtable TeamInfoList = new Hashtable(); //key=id, value=team
-            //private Hashtable InList = new Hashtable();       //key=id, value=IPEndPoint
-            //private Hashtable MemberInfoList = new Hashtable();
-            //private Hashtable FileSendDetailList = new Hashtable();
-            //private Hashtable FileSendFormList = new Hashtable();
-            //private Hashtable FileSendThreadList = new Hashtable();
-            //private Hashtable FileReceiverThreadList = new Hashtable();
-            //private Hashtable NoticeDetailForm = new Hashtable();
-            //private Hashtable treesource = new Hashtable();
-            //private ArrayList MemoTable = new ArrayList();
-            //private ArrayList omitteamlist = new ArrayList();
+        //private Hashtable ChatFormList = new Hashtable();  //채팅창  key=id, value=chatform
+        //private Hashtable MemoFormList = new Hashtable(); //key=time, value=SendMemoForm
+        //private Hashtable TeamInfoList = new Hashtable(); //key=id, value=team
+        //private Hashtable InList = new Hashtable();       //key=id, value=IPEndPoint
+        //private Hashtable MemberInfoList = new Hashtable();
+        //private Hashtable FileSendDetailList = new Hashtable();
+        //private Hashtable FileSendFormList = new Hashtable();
+        //private Hashtable FileSendThreadList = new Hashtable();
+        //private Hashtable FileReceiverThreadList = new Hashtable();
+        //private Hashtable NoticeDetailForm = new Hashtable();
+        //private Hashtable treesource = new Hashtable();
+        //private ArrayList MemoTable = new ArrayList();
+        //private ArrayList omitteamlist = new ArrayList();
             try
             {
                 if (noticelistform != null)
@@ -10124,7 +10219,7 @@ namespace Client
 
         private void QuitMsg()
         {
-            bool isOk = true;
+            bool isOk = true ;
             if (connected == true)
             {
                 this.notifyIcon.Visible = false;
@@ -10176,17 +10271,17 @@ namespace Client
 
         private void NRmemo_Click(object sender, EventArgs e)
         {
-
+           
         }
 
         private void NRfile_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void NRnotice_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void MnNotice_Click(object sender, EventArgs e)
@@ -10201,7 +10296,7 @@ namespace Client
 
         private void pic_noticeresult_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         //private void pic_connector_Click(object sender, EventArgs e)
@@ -10336,11 +10431,11 @@ namespace Client
 
         private void selectAllforNoticeList()
         {
-            ListView.ListViewItemCollection collection = noticelistform.listView.Items;
-            foreach (ListViewItem item in collection)
-            {
-                item.Checked = true;
-            }
+           ListView.ListViewItemCollection collection = noticelistform.listView.Items;
+           foreach (ListViewItem item in collection)
+           {
+               item.Checked = true;
+           }
         }
 
         private void selectcancelforNoticeList()
@@ -10370,7 +10465,7 @@ namespace Client
                     view = (ListView)button.Parent.Controls[i];
                 }
             }
-
+            
             string delnotices = "15|";
             if (view.CheckedItems.Count == 0)
             {
@@ -10386,20 +10481,20 @@ namespace Client
                     view.Items.RemoveAt(item.Index);
                 }
                 SendMsg(delnotices, server);
-
+                
             }
         }
 
         private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-
+            
             NoticeListSorting sorting = new NoticeListSorting(Noticelistform_Sorting);
             Invoke(sorting, new object[] { e.Column });
         }
 
         private void Noticelistform_Sorting(int columnindex)
         {
-            ListView.ListViewItemCollection collection = noticelistform.listView.Items;
+            ListView.ListViewItemCollection collection= noticelistform.listView.Items;
 
         }
 
@@ -10546,10 +10641,10 @@ namespace Client
                     string temp = mitem.SubItems[3].Text; //보낸사람
                     string[] ar1 = temp.Split('(');
                     string[] ar2 = ar1[1].Split(')');
-                    string name = ar1[0];
+                    string name = ar1[0];   
                     string id = ar2[0];
                     string msg = mitem.SubItems[2].Text; //내용
-                    string mode = mitem.SubItems[0].Text;
+                    string mode = mitem.SubItems[0].Text; 
                     string ntime = mitem.SubItems[4].Text;
                     string seqnum = mitem.Tag.ToString();
                     string title = mitem.SubItems[1].Text;
@@ -10577,7 +10672,7 @@ namespace Client
         {
             try
             {
-
+               
                 ArrayList list = MemoFileRead();
                 if (list == null || list.Count == 0)
                 {
@@ -10596,9 +10691,24 @@ namespace Client
                     }
                     memolistform.listView.SelectedIndexChanged += new EventHandler(memolistView_Click);
                     memolistform.MouseClick += new MouseEventHandler(btn_del_Click_forMemo);
+
+                    string source = "";
                     foreach (object obj in list)
                     {
-                        string source = (string)obj;  //item(m|name|id|message|수신사id|time)
+                        if (((string)obj).Length > 2 && ((string)obj).Substring(0, 2) == MEMO_HEADER)
+                        {
+                            source = (string)obj;  //item(m|name|id|message|수신사id|time)
+                        }
+                        else
+                        {
+                            source += Environment.NewLine +(string)obj;  //item(m|name|id|message|수신사id|time)
+                        }
+                        if (source.Split('|').Length < 6) continue; 
+
+                        logWrite("memo[" + source + "]");
+                        
+                        //> 2 && source.Substring(0,2) == MEMO_HEADER ) 
+
                         if (source.Length != 0)
                         {
                             string[] subitems = source.Split('|');
@@ -10607,6 +10717,7 @@ namespace Client
                             item.SubItems.Add(subitems[3]);
                             item.Tag = source;
                         }
+                        source = "";
                     }
                     memolistform.Show();
                 }
@@ -10631,11 +10742,11 @@ namespace Client
 
         private void selectAllForMemoList()
         {
-            ListView.ListViewItemCollection collection = memolistform.listView.Items;
-            foreach (ListViewItem item in collection)
-            {
-                item.Checked = true;
-            }
+           ListView.ListViewItemCollection collection = memolistform.listView.Items;
+           foreach (ListViewItem item in collection)
+           {
+               item.Checked = true;
+           }
         }
 
         private void selectCancelForMemoList()
@@ -10761,9 +10872,9 @@ namespace Client
             webBrowser1.SetBounds(webBrowser1.Left, 435 + heightgap, webBrowser1.Width, webBrowser1.Height);
             pictureBox2.SetBounds(pictureBox2.Left, 430 + heightgap, pictureBox2.Width, pictureBox2.Height);//임시이미지판
             panel_logon.Width = this.Width;
-            panel_logon.Height = this.Height - (600 - 519);
-            memTree.Width = this.Width - (290 - 220);
-            memTree.Height = this.Height - (600 - 325);
+            panel_logon.Height = this.Height - (600-519);
+            memTree.Width = this.Width - (290-220);
+            memTree.Height = this.Height - (600-325);
 
             InfoBar.Width = this.Width;
 
@@ -10781,7 +10892,7 @@ namespace Client
         /// <param name="e"></param>
         private void pic_DialogList_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void btn_cancel_MouseClick(object sender, MouseEventArgs e)
@@ -11109,7 +11220,7 @@ namespace Client
             Invoke(dele);
         }
 
-
+        
 
         private void memTree_AfterCollapse(object sender, TreeViewEventArgs e)
         {
@@ -11125,7 +11236,7 @@ namespace Client
 
         private void pbx_sizemark_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+             if (e.Button == MouseButtons.Left)
             {
                 mousePoint = e.Location;
             }
@@ -11190,7 +11301,7 @@ namespace Client
             catch (Exception ex)
             {
                 logWrite(ex.ToString());
-            }
+            }  
         }
 
         private void tbx_extension_KeyDown(object sender, KeyEventArgs e)
@@ -11267,7 +11378,7 @@ namespace Client
 
         private void Client_Form_Shown(object sender, EventArgs e)
         {
-
+           
         }
 
         private void StripMn_online_Click(object sender, EventArgs e)
@@ -11323,14 +11434,14 @@ namespace Client
                     pbx_stat.Image = global::Client.Properties.Resources.로그아웃;
                     break;
 
-                case "다른용무중":
+                case "다른용무중" :
                     pbx_stat.Image = global::Client.Properties.Resources.다른용무중;
                     break;
 
-                case "통화중":
+                case "통화중" :
                     pbx_stat.Image = global::Client.Properties.Resources.통화중;
                     break;
-
+                    
                 case "온라인":
                     pbx_stat.Image = global::Client.Properties.Resources.온라인;
                     break;
@@ -11369,7 +11480,7 @@ namespace Client
 
         private void pic_crm_MouseClick(object sender, MouseEventArgs e)
         {
-
+            
         }
 
         private void pic_crm_MouseEnter(object sender, EventArgs e)
@@ -11406,6 +11517,11 @@ namespace Client
                 if (nopop == true)
                 {
                     configform.cbx_nopop.Checked = true;
+                }
+
+                if (nopop_outbound == true)
+                {
+                    configform.cbx_nopop_outbound.Checked = true;
                 }
 
                 configform.Show();
@@ -11478,7 +11594,8 @@ namespace Client
             try
             {
                 System.Configuration.ConfigurationSettings.AppSettings.Set("save_pass", "0");
-                setConfigXml(Application.StartupPath + "\\WDMsg_Client.exe.config", "save_pass", "0");
+                //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "save_pass", "0");
+                setConfigXml(AppConfigFullPath, "save_pass", "0");
             }
             catch (Exception ex)
             {
@@ -11510,7 +11627,7 @@ namespace Client
 
         private void TM_file_MouseClick(object sender, MouseEventArgs e)
         {
-
+            
         }
 
         private void MnFile_MouseClick(object sender, MouseEventArgs e)
@@ -11632,7 +11749,7 @@ namespace Client
 
                     dialoglistform.listView.SelectedIndexChanged += new EventHandler(DialoglistView_Click);
                     dialoglistform.btn_del.MouseClick += new MouseEventHandler(btn_del_Click_forDialog);
-
+                    
                     foreach (object obj in list)
                     {
                         FileInfo tempfi = (FileInfo)obj;
@@ -11696,7 +11813,7 @@ namespace Client
 
         private void panel_logon_MouseClick(object sender, MouseEventArgs e)
         {
-
+           
         }
 
         private void pictureBox2_MouseClick(object sender, MouseEventArgs e)
@@ -11717,7 +11834,7 @@ namespace Client
 
         private void pictureBox2_MouseEnter(object sender, EventArgs e)
         {
-
+            
         }
 
         private void NRmemo_Click(object sender, MouseEventArgs e)
@@ -11920,7 +12037,7 @@ namespace Client
         {
             //getForegroundWindow();
         }
-
+        
     }
 
 

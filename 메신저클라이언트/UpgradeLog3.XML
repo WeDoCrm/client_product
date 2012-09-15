@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Client">
+</Property><Property Name="Solution File" Value="C:\work\source\메신저클라이언트\Client.sln">
+</Property><Property Name="User Options File" Value="C:\work\source\메신저클라이언트\Client.suo">
+</Property><Property Name="Date" Value="2012년 8월 22일 수요일">
+</Property><Property Name="Time" Value="오후 21:56">
+</Property><Property Name="Log Number" Value="3">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="Client.sln" Description="File successfully backed up as C:\work\source\메신저클라이언트\Backup\Client.sln">
+</Event><Event ErrorLevel="0" Project="" Source="Client.suo" Description="File successfully backed up as C:\work\source\메신저클라이언트\Backup\Client.suo">
+</Event><Event ErrorLevel="2" Project="Client" Source="Client.csproj" Description="Unable to open project file to perform upgrade.  ">
+</Event><Event ErrorLevel="0" Project="" Source="Client.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="Client.sln" Description="Converted">
+</Event></UpgradeLog>

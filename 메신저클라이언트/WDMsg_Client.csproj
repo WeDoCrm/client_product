@@ -246,6 +246,7 @@
     <Compile Include="MissedCallList.Designer.cs">
       <DependentUpon>MissedCallList.cs</DependentUpon>
     </Compile>
+    <Compile Include="MsgDef.cs" />
     <Compile Include="NoReceiveBoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
