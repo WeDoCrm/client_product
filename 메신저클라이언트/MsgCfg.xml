@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appcfg>
+    <item key="serverip" value="10.150.88.120"/>
+  </appcfg>
+</configuration>

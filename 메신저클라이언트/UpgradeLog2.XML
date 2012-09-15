@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="EXMsg_Client">
+</Property><Property Name="솔루션 파일" Value="C:\Users\bskim\개발\도로공사\EXMsg_Client\EXMsg_Client.sln">
+</Property><Property Name="사용자 옵션 파일" Value="C:\Users\bskim\개발\도로공사\EXMsg_Client\EXMsg_Client.suo">
+</Property><Property Name="Date" Value="2010년 3월 8일 월요일">
+</Property><Property Name="Time" Value="오후 13:30">
+</Property><Property Name="로그 번호" Value="2">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="EXMsg_Client.sln" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\EXMsg_Client.sln(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="" Source="EXMsg_Client.suo" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\EXMsg_Client.suo(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="EXMsg_Client.csproj" Description="프로젝트 파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\EXMsg_Client.csproj(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="EXMsg_Client.csproj.user" Description="프로젝트 사용자 파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\EXMsg_Client.csproj.user(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="AddMemberForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\AddMemberForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="AddMemberForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\AddMemberForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="AssemblyInfo.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\AssemblyInfo.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="ChatForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\ChatForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="ChatForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\ChatForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Class1.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Class1.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Client_Form.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Client_Form.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="FileSendDetailListView.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\FileSendDetailListView.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="FileSendDetailListView.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\FileSendDetailListView.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="log.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\log.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="log.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\log.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Notice.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Notice.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Notice.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Notice.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadMemoForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadMemoForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadMemoForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadMemoForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadNoticeForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadNoticeForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadNoticeForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadNoticeForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReceiveFileForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReceiveFileForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReceiveFileForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReceiveFileForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendNoticeForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendNoticeForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendNoticeForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendNoticeForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendFileForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendFileForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendFileForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendFileForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendMemoForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendMemoForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendMemoForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendMemoForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="MemoForm.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\MemoForm.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="MemoForm.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\MemoForm.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Properties\Resources.Designer.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Properties\Resources.Designer.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SetServer_Form.cs" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SetServer_Form.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="express.png" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\express.png(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Resources\express.png" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Resources\express.png(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="ClassDiagram1.cd" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\ClassDiagram1.cd(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Client_TemporaryKey.pfx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Client_TemporaryKey.pfx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="App.ico" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\App.ico(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="AddMemberForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\AddMemberForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="ChatForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\ChatForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Client_Form.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Client_Form.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="FileSendDetailListView.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\FileSendDetailListView.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="log.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\log.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Notice.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Notice.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadMemoForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadMemoForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReadNoticeForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReadNoticeForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="NotReceiveFileForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\NotReceiveFileForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendFileForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendFileForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendMemoForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendMemoForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="MemoForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\MemoForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="Properties\Resources.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\Properties\Resources.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SendNoticeForm.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SendNoticeForm.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="SetServer_Form.resx" Description="파일을 C:\Users\bskim\개발\도로공사\EXMsg_Client\Backup1\SetServer_Form.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="EXMsg_Client.csproj" Description="프로젝트를 변환했습니다.">
+</Event><Event ErrorLevel="3" Project="EXMsg_Client" Source="EXMsg_Client.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="EXMsg_Client.sln" Description="솔루션을 변환했습니다.">
+</Event><Event ErrorLevel="3" Project="" Source="EXMsg_Client.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="EXMsg_Client" Source="EXMsg_Client.csproj" Description="검사 완료: 프로젝트 파일을 업그레이드할 필요가 없습니다.">
+</Event></UpgradeLog>

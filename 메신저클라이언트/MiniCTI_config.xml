@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<environment>
+  <db>
+    <dbproduct>sqlserver</dbproduct>
+    <dbserverip>114.202.2.33</dbserverip>
+    <dbname>wedo_db</dbname>
+    <dbuserid>root</dbuserid>
+    <dbuserpw>Genesys!@#</dbuserpw>
+  </db>
+  <worktype>
+  	<usears>Y</usears>
+  </worktype>
+</environment>

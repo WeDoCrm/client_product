@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Client">
+</Property><Property Name="솔루션 파일" Value="C:\Users\ㄱ\교육자료\Jnp\Client\Client.sln">
+</Property><Property Name="사용자 옵션 파일" Value="C:\Users\ㄱ\교육자료\Jnp\Client\Client.suo">
+</Property><Property Name="Date" Value="2009년 12월 28일 월요일">
+</Property><Property Name="Time" Value="오후 12:58">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="Client.sln" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client.sln(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="" Source="Client.suo" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client.suo(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client.csproj" Description="프로젝트 파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client.csproj(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client.csproj.user" Description="프로젝트 사용자 파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client.csproj.user(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="AssemblyInfo.cs" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\AssemblyInfo.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client_Form.cs" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client_Form.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Information_Form.cs" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Information_Form.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="SetServer_Form.cs" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\SetServer_Form.cs(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="App.ico" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\App.ico(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client_Form.resx" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Client_Form.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Information_Form.resx" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\Information_Form.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="SetServer_Form.resx" Description="파일을 C:\Users\ㄱ\교육자료\Jnp\Client\Backup\SetServer_Form.resx(으)로 백업했습니다.">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client.csproj" Description="프로젝트를 변환했습니다.">
+</Event><Event ErrorLevel="3" Project="Client" Source="Client.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="Client.sln" Description="솔루션을 변환했습니다.">
+</Event><Event ErrorLevel="3" Project="" Source="Client.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="Client" Source="Client.csproj" Description="검사 완료: 프로젝트 파일을 업그레이드할 필요가 없습니다.">
+</Event></UpgradeLog>

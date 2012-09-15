@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDMsg_Client", "WDMsg_Client.csproj", "{BF421C0E-81B7-482F-AA8B-313AFE0A44A8}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "..\Setup\Setup.vdproj", "{B1A6ED64-B0EA-4833-BDC8-A62E076C2ADB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF421C0E-81B7-482F-AA8B-313AFE0A44A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF421C0E-81B7-482F-AA8B-313AFE0A44A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF421C0E-81B7-482F-AA8B-313AFE0A44A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF421C0E-81B7-482F-AA8B-313AFE0A44A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A6ED64-B0EA-4833-BDC8-A62E076C2ADB}.Debug|Any CPU.ActiveCfg = Debug
+		{B1A6ED64-B0EA-4833-BDC8-A62E076C2ADB}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VSCustomBkgrdPaint = False
+		VSUseSystemFonts = False
+		VSSkinToggleButtons = True
+		VSSkinFlatStyles = True
+		VSTextShadow = True
+		VSToolStripStyle = Mixed
+		VSTargetControls = FormsAndControls
+		VSStyle = OSX (Panther)_custom.vssf
+	EndGlobalSection
+EndGlobal
