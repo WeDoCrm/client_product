@@ -7043,7 +7043,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int num = button.Parent.Controls.Count;
                 ListBox addbox = null;
                 ListBox currbox = null;
@@ -7122,7 +7122,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int num = button.Parent.Controls.Count;
                 ListBox addbox = null;
                 ListBox currbox = null;
@@ -9297,7 +9297,7 @@ namespace Client
         {
             try
             {
-                PictureBox button = (PictureBox)sender;
+                Button button = (Button)sender;
                 int controlsNum = button.Parent.Controls.Count;
                 string key = null;
                 for (int i = 0; i < controlsNum; i++)
