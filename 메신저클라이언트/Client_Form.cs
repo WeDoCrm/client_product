@@ -383,6 +383,8 @@ namespace Client
                 UpdateSourceFullPath = UpdateSourceDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
                 UpdateTargetFullPath = UpdateTargetDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
                 MsgrTitle = CommonDef.MSGR_TITLE_PROD;
+                FtpHost = CommonDef.FTP_HOST_PROD; 
+                version = CommonDef.FTP_VERSION_PROD;
             }
             else
             {
@@ -395,6 +397,8 @@ namespace Client
                 UpdateSourceFullPath = UpdateSourceDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
                 UpdateTargetFullPath = UpdateTargetDir + CommonDef.PATH_DELIM + CommonDef.UPDATE_EXE;
                 MsgrTitle = CommonDef.MSGR_TITLE_DEMO;
+                FtpHost = CommonDef.FTP_HOST_DEMO;
+                version = CommonDef.FTP_VERSION_DEMO;
             }
             logWrite("Product Mode[" + AppName + "][" + IsProductMode + "]");
 
@@ -465,13 +469,11 @@ namespace Client
                 top = System.Configuration.ConfigurationSettings.AppSettings["topmost"].ToString();
                 string sNopop = System.Configuration.ConfigurationSettings.AppSettings["nopop"].ToString();
 
-                FtpHost = CommonDef.FTP_HOST;
                 tempFolder = CommonDef.FTP_LOCAL_DIR;
                 passwd = CommonDef.FTP_PASS;
                 FtpPort = CommonDef.FTP_PORT;
                 FtpUsername = CommonDef.FTP_USERID;
                 updaterDir = UpdateTargetFullPath; //System.Configuration.ConfigurationSettings.AppSettings["UpdaterDir"].ToString();
-                version = CommonDef.FTP_VERSION;
                 
                 if (sNopop.Equals("1"))
                 {
@@ -2113,7 +2115,9 @@ namespace Client
                         }
                     }
                     catch (ThreadAbortException e)
-                    { }
+                    {
+                        logWrite("Receive() 에러 : " + e.ToString());
+                    }
                     catch (SocketException e)
                     {
                         if (connected == true)
@@ -2121,11 +2125,11 @@ namespace Client
                     }
                 }
                 
-                if (connected == true)
-                    logWrite("##경고## : Receiver 가 중단되었습니다. ");
             }
             catch (Exception ex)
             {
+                if (connected == true)
+                    logWrite("##경고## : Receiver 가 중단되었습니다. ");
                 logWrite(ex.ToString());
             }
         }
@@ -3918,6 +3922,8 @@ namespace Client
         {
             try
             {
+                logWrite("Ringing : ani[" + ani + "]name[" + name + "]server_type[" + server_type + "]nopop[" + nopop + "]");
+
                 CustomerList[ani] = name;
                 if (popform != null)
                 {
@@ -3964,7 +3970,7 @@ namespace Client
 
         private void Answer(string ani, string calltype)
         {
-           
+            logWrite("Answer : ani[" + ani + "]calltype[" + calltype + "]nopop[" + nopop + "]nopop_outbound[" + nopop_outbound + "]");
             if (popform != null)
             {
                 t1.Stop();
@@ -3997,6 +4003,8 @@ namespace Client
                 }
                 catch (System.ObjectDisposedException dis)
                 {
+                    logWrite("에러발생:"+dis.ToString());
+
                     //getForegroundWindow();
                     cm.SetUserInfo(com_cd, this.myid, tbx_pass.Text, serverIP, socket_port_crm);
                     crm_main = new FRM_MAIN();
