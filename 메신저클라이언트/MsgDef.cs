@@ -43,6 +43,6 @@
         public const string FTP_USERID = "eclues";
         public const string FTP_PASS = "eclues!@";
         public const string FTP_VERSION_DEMO = "2.1.54";
-        public const string FTP_VERSION_PROD = "2.1.47";
+        public const string FTP_VERSION_PROD = "2.1.48";
     }
 }
