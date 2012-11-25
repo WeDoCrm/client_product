@@ -2959,6 +2959,8 @@ namespace Client
 
                 string[] tempMsg = msg.Split('|');
                 string code = tempMsg[0];
+                string tempFormKey = ChatUtils.getFormKey(tempMsg[1], myid);
+
                 switch (code)
                 {
                     case "f"://로그인 실패시(f|n or p)
@@ -2984,9 +2986,13 @@ namespace Client
 
                         stringDele changeProgressStyle = new stringDele(chageProgressbar);
                         Invoke(changeProgressStyle, "로딩중");
+
+                        //CHOI_DEBUG:2.1.49 wedo server와 DB(호스트서버이용)가 다른 경우를 감안,
+                        // MiniCTI_config.xml파일에 server IP->DB server IP를 반영하지 않음
+                        /*
                         setCRM_DB_HOST(XmlConfigOrgFullPath, serverIP);//Application.StartupPath + "\\MiniCTI_config_demo.xml", serverIP);
                         setCRM_DB_HOST(XmlConfigFullPath, serverIP);//"c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", serverIP);
-
+                        */
                         FileInfo temp = new FileInfo(XmlConfigOrgFullPath);//Application.StartupPath + "\\MiniCTI_config_demo.xml");
 
                         FileInfo tempfileinfo = new FileInfo(XmlConfigFullPath);//"C:\\MiniCTI\\config\\MiniCTI_config_demo.xml");
@@ -2995,11 +3001,12 @@ namespace Client
                             logWrite("MiniCTI config 파일 없음");
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName);
                         }
+                        /*CHOI_DEBUG:2.1.49
                         else
                         {
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName, true);
                         }
-
+                        */
                         myname = tempMsg[1];//서버측에서 전달된 이름 저장
                         myid = this.id.Text;
                         com_cd = tempMsg[4];
@@ -3145,9 +3152,9 @@ namespace Client
                         string[] ids = tempMsg[2].Split('/');
                         if (!ids[0].Equals(myid))
                         {
-                            if (ChatFormList.Contains(tempMsg[1]) && ChatFormList[tempMsg[1]] != null)  //이미 발신자와 채팅중일 경우
+                            if (ChatFormList.Contains((string)tempFormKey) && ChatFormList[(string)tempFormKey] != null)  //이미 발신자와 채팅중일 경우
                             {
-                                ChatForm form = (ChatForm)ChatFormList[tempMsg[1]];
+                                ChatForm form = (ChatForm)ChatFormList[(string)tempFormKey];
                                 AddChatMsg addMsg = new AddChatMsg(Addmsg);
                                 string smsg = tempMsg[3] + "|" + tempMsg[4];
                                 Invoke(addMsg, new object[] { smsg, form });
@@ -3165,10 +3172,10 @@ namespace Client
 
                     case "c":  //c|formkey|id/id/..|name  //대화중 초대가 일어난 경우
 
-                        if (ChatFormList.ContainsKey(tempMsg[1]) && ChatFormList[tempMsg[1]] != null)
+                        if (ChatFormList.ContainsKey((string)tempFormKey) && ChatFormList[(string)tempFormKey] != null)
                         {
                             string[] nameArray = tempMsg[2].Split('/');
-                            ChatForm form = (ChatForm)ChatFormList[tempMsg[1]];
+                            ChatForm form = (ChatForm)ChatFormList[(string)tempFormKey];
                             AddChatter addChatter = new AddChatter(Addchatter);
                             AddChatMsg addMsg = new AddChatMsg(Addmsg);
 
@@ -3189,10 +3196,9 @@ namespace Client
                         break;
 
                     case "q": //다자 대화중 상대방이 대화창 나감 (q|Formkey|id)
-
-                        if (ChatFormList.ContainsKey(tempMsg[1]) && ChatFormList[tempMsg[1]] != null)
+                        if (ChatFormList.ContainsKey((string)tempFormKey) && ChatFormList[(string)tempFormKey] != null)
                         {
-                            ChatForm form = (ChatForm)ChatFormList[tempMsg[1]];
+                            ChatForm form = (ChatForm)ChatFormList[(string)tempFormKey];
                             DelChatterDelegate delchatter = new DelChatterDelegate(DelChatter);
                             Invoke(delchatter, new object[] { tempMsg[2], form });
                         }
@@ -3201,9 +3207,9 @@ namespace Client
 
                     case "dc": //다자 대화중 상대방이 연결 끊김 (dc|Formkey|id)
 
-                        if (ChatFormList.ContainsKey(tempMsg[1]) && ChatFormList[tempMsg[1]] != null)
+                        if (ChatFormList.ContainsKey((string)tempFormKey) && ChatFormList[(string)tempFormKey] != null)
                         {
-                            ChatForm form = (ChatForm)ChatFormList[tempMsg[1]];
+                            ChatForm form = (ChatForm)ChatFormList[(string)tempFormKey];
                             
                         }
 
@@ -5714,7 +5720,8 @@ namespace Client
                             logWrite("LogoutChatter() 검색성공 : " + node[0].Text);
                             form.chatBox.AppendText("\r\n\r\n###" + node[0].Text + "님이 로그아웃 하셨습니다.\r\n\r\n");
                             form.chatBox.ScrollToCaret();
-                            node[0].Remove();
+                            //node[0].Remove();
+                            node[0].Tag = ChatUtils.TagAsLoggedOutId(ChatUtils.GetIdFromNodeTag((string)node[0].Tag));
                         }
                     }
                 }
@@ -6094,14 +6101,14 @@ namespace Client
                             {
                                 if ("ChattersTree".Equals(msgBox.Parent.Controls[i].Name))
                                 {
-                                    ArrayList array = new ArrayList();
+                                    //ArrayList array = new ArrayList();
                                     TreeView view = (TreeView)msgBox.Parent.Controls[i];
                                     if (view.Nodes.Count != 0)
                                     {
                                         for (int n = 0; n < view.Nodes.Count; n++)
                                         {
-                                            ids += view.Nodes[n].Tag + "/";
-                                            array.Add(view.Nodes[n].Tag);
+                                            ids += ChatUtils.GetIdFromNodeTag((string)view.Nodes[n].Tag) + "/";
+                                            //array.Add(view.Nodes[n].Tag);
                                         }
                                     }
                                     str = "16|" + key + "|" + ids + "|" + myname + "|" + msgBox.Text.Trim();    //d|Formkey|id/id/..|발신자name|메시지 
@@ -6249,7 +6256,7 @@ namespace Client
                 ChatForm chatForm = new ChatForm();
                 chatForm.txtbox_exam.Font = txtfont;
                 chatForm.txtbox_exam.ForeColor = txtcolor;
-                chatForm.Formkey.Text = ar[1];
+                chatForm.Formkey.Text = ChatUtils.getFormKey(ar[1], myid);
                 string[] tempidar = ar[2].Split('/');
                 for (int i = 0; i < (tempidar.Length - 1); i++)
                 {
@@ -6265,8 +6272,9 @@ namespace Client
                         {
                             chatForm.Text += "/" + name;
                         }
+                        
                         TreeNode parti = chatForm.ChattersTree.Nodes.Add(tempid, name + "(" + tempid + ")");
-                        parti.Tag = tempid;
+                        parti.Tag = ChatUtils.TagAsLoggedInId(tempid);
                         parti.ImageIndex = 0;
                         parti.SelectedImageIndex = 0;
                     }
@@ -6488,7 +6496,7 @@ namespace Client
                 chatForm.Text = chatter;
                 chatForm.txtbox_exam.Font = txtfont;
                 chatForm.txtbox_exam.ForeColor = txtcolor;
-                chatForm.Formkey.Text = DateTime.Now.ToString() +"!"+ this.myid;
+                chatForm.Formkey.Text = ChatUtils.getFormKey(ids,this.myid); //DateTime.Now.ToString() +"!"+ this.myid;
                 logWrite("Formkey 생성 : <" + chatForm.Formkey.Text + ">");
                 ToolTip tip = new ToolTip();
                 tip.SetToolTip(chatForm.BtnAddChatter, "대화 상대방 추가");
@@ -6509,7 +6517,7 @@ namespace Client
                 {
                     string name = getName(ids);
                     TreeNode node = chatForm.ChattersTree.Nodes.Add(ids, name + "(" + ids + ")");//대화창에 참가자 노드 추가(key=id, text=name)
-                    node.Tag = ids;
+                    node.Tag = ids+CommonDef.CHAT_USER_LOG_IN;
                     node.ImageIndex = 0;
                     node.SelectedImageIndex = 0;
                 }
@@ -6922,7 +6930,7 @@ namespace Client
                 chatForm.Text = chattersName;
                 chatForm.txtbox_exam.ForeColor = txtcolor;
                 chatForm.txtbox_exam.Font = txtfont;
-                chatForm.Formkey.Text = DateTime.Now.ToString() + this.myid;
+                chatForm.Formkey.Text = ChatUtils.getFormKey(ids,this.myid);//DateTime.Now.ToString() + this.myid;
                 logWrite("Formkey 생성 : " + chatForm.Formkey.Text);
 
                 string[] tempidar = ids.Split('/');
@@ -6932,8 +6940,9 @@ namespace Client
                     {
                         string tempid = tempidar[i];
                         string name = getName(tempid);
+
                         TreeNode node = chatForm.ChattersTree.Nodes.Add(tempid, name + "(" + tempid + ")");
-                        node.Tag = tempid;
+                        node.Tag = tempid+CommonDef.CHAT_USER_LOG_IN;
                         node.ImageIndex = 1;
                         node.SelectedImageIndex = 1;
                     }
@@ -7761,11 +7770,7 @@ namespace Client
             {
                 if (form.ChattersTree.Nodes.Count != 0)
                 {
-                    chatters = new string[form.ChattersTree.Nodes.Count];
-                    for (int i = 0; i < form.ChattersTree.Nodes.Count; i++)
-                    {
-                        chatters[i] = (string)form.ChattersTree.Nodes[i].Tag;
-                    }
+                    chatters = ChatUtils.GetLoggedInIdFromNodeTag(form.ChattersTree.Nodes);
                 }
             }
             catch (Exception exception)
@@ -7783,10 +7788,10 @@ namespace Client
             {
                 foreach (TreeNode anode in nodearray)
                 {
-                    if (!id.Equals(anode.Tag.ToString()))
+                    if (!id.Equals(ChatUtils.GetIdFromNodeTag(anode.Tag.ToString())))
                     {
                         TreeNode node = form.ChattersTree.Nodes.Add(id, name + "(" + id + ")");
-                        node.Tag = id;
+                        node.Tag = id+CommonDef.CHAT_USER_LOG_IN;
                         node.ImageIndex = 0;
                         node.SelectedImageIndex = 0;
                         form.Text += "/" + name;
@@ -7797,7 +7802,7 @@ namespace Client
             else
             {
                 TreeNode node = form.ChattersTree.Nodes.Add(id, name + "(" + id + ")");
-                node.Tag = id;
+                node.Tag = id+CommonDef.CHAT_USER_LOG_IN;
                 node.ImageIndex = 0;
                 node.SelectedImageIndex = 0;
                 form.Text += "/" + name;
@@ -8844,7 +8849,7 @@ namespace Client
             try
             {
                 SendFileForm sendform = new SendFileForm();
-                sendform.formkey.Text = DateTime.Now.ToLongTimeString();
+                sendform.formkey.Text = DateTime.Now.ToLongTimeString();//CHOI_DEBUG
                 sendform.btn_start.MouseClick += new MouseEventHandler(btn_start_Click);
                 sendform.btn_cancel.MouseClick += new MouseEventHandler(btn_cancel_Click);
                 sendform.btn_receivers.MouseClick += new MouseEventHandler(btn_receivers_Click);
@@ -9521,12 +9526,16 @@ namespace Client
                 {
                     tempip = "localhost";
                 }
-                //setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "serverip", tempip);
                 setConfigXml(AppConfigFullPath, "serverip", tempip);
-                //setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", tempip);
+                //-->setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "serverip", tempip);
+                //CHOI_DEBUG:2.1.49 wedo server와 DB(호스트서버이용)가 다른 경우를 감안,
+                // MiniCTI_config.xml파일에 server IP->DB server IP를 반영하지 않음
+                /*
                 setCRM_DB_HOST(XmlConfigFullPath, tempip);
-                //setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config_demo.xml", tempip);
+                //-->setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", tempip);
                 setCRM_DB_HOST(XmlConfigOrgFullPath, tempip);
+                //-->setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config_demo.xml", tempip);
+                */ 
                 serverIP = tempip;
                 System.Configuration.ConfigurationSettings.AppSettings.Set("serverip", serverIP);
 
