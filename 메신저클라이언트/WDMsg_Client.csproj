@@ -183,6 +183,18 @@
     <Compile Include="ChatForm.Designer.cs">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Sockets\Constant.cs" />
+    <Compile Include="Sockets\FtpClientManager.cs" />
+    <Compile Include="Sockets\Logger.cs" />
+    <Compile Include="Sockets\MiscObjs.cs" />
+    <Compile Include="Sockets\MsgrClientManager.cs" />
+    <Compile Include="Sockets\ServerListeners.cs" />
+    <Compile Include="Sockets\ServerManager.cs" />
+    <Compile Include="Sockets\SocketClient.cs" />
+    <Compile Include="Sockets\SyncSocket.cs" />
+    <Compile Include="Sockets\TcpClientManager.cs" />
+    <Compile Include="Sockets\Utils.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="Client_Form.cs">
       <SubType>Form</SubType>
     </Compile>

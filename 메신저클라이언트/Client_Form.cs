@@ -2987,12 +2987,9 @@ namespace Client
                         stringDele changeProgressStyle = new stringDele(chageProgressbar);
                         Invoke(changeProgressStyle, "로딩중");
 
-                        //CHOI_DEBUG:2.1.49 wedo server와 DB(호스트서버이용)가 다른 경우를 감안,
-                        // MiniCTI_config.xml파일에 server IP->DB server IP를 반영하지 않음
-                        /*
                         setCRM_DB_HOST(XmlConfigOrgFullPath, serverIP);//Application.StartupPath + "\\MiniCTI_config_demo.xml", serverIP);
                         setCRM_DB_HOST(XmlConfigFullPath, serverIP);//"c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", serverIP);
-                        */
+
                         FileInfo temp = new FileInfo(XmlConfigOrgFullPath);//Application.StartupPath + "\\MiniCTI_config_demo.xml");
 
                         FileInfo tempfileinfo = new FileInfo(XmlConfigFullPath);//"C:\\MiniCTI\\config\\MiniCTI_config_demo.xml");
@@ -3001,12 +2998,11 @@ namespace Client
                             logWrite("MiniCTI config 파일 없음");
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName);
                         }
-                        /*CHOI_DEBUG:2.1.49
                         else
                         {
                             FileInfo file_copied = temp.CopyTo(tempfileinfo.FullName, true);
                         }
-                        */
+                        
                         myname = tempMsg[1];//서버측에서 전달된 이름 저장
                         myid = this.id.Text;
                         com_cd = tempMsg[4];
@@ -9527,15 +9523,11 @@ namespace Client
                     tempip = "localhost";
                 }
                 setConfigXml(AppConfigFullPath, "serverip", tempip);
-                //-->setConfigXml(Application.StartupPath + "\\WDMsg_Client_Demo.exe.config", "serverip", tempip);
-                //CHOI_DEBUG:2.1.49 wedo server와 DB(호스트서버이용)가 다른 경우를 감안,
-                // MiniCTI_config.xml파일에 server IP->DB server IP를 반영하지 않음
-                /*
                 setCRM_DB_HOST(XmlConfigFullPath, tempip);
                 //-->setCRM_DB_HOST("c:\\MiniCTI\\config\\MiniCTI_config_demo.xml", tempip);
                 setCRM_DB_HOST(XmlConfigOrgFullPath, tempip);
                 //-->setCRM_DB_HOST(Application.StartupPath + "\\MiniCTI_config_demo.xml", tempip);
-                */ 
+                 
                 serverIP = tempip;
                 System.Configuration.ConfigurationSettings.AppSettings.Set("serverip", serverIP);
 
